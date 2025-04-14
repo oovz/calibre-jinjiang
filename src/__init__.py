@@ -23,7 +23,7 @@ JINJIANG_BOOK_URL_PATTERN = re.compile(
 JINJIANG_BOOKCOVER_URL = "https://i9-static.jjwxc.net/novelimage.php?novelid=%s"
 
 PROVIDER_ID = "jinjiang"
-PROVIDER_VERSION = (1, 2, 5)
+PROVIDER_VERSION = (1, 2, 6)
 PROVIDER_AUTHOR = "Otaro"
 
 
@@ -374,23 +374,31 @@ class Jinjiang(Source):
                 # Remove the tailing '_300_420' to get original image
                 cleaned_path = re.sub(r"_300_420(?=\.\w+$)", "", parsed.path)
                 cover_url = f"{parsed.scheme}://{parsed.netloc}{cleaned_path}"
-                log("Downloading custom cover from:", cover_url)
                 try:
                     time.sleep(1)
+                    log("Downloading authorspace 'original' custom cover from:", cover_url)
                     cdata = br.open_novisit(cover_url, timeout=timeout).read()
                     if cdata:
                         result_queue.put((self, cdata))
                 except:
-                    log.exception("Failed to download 'original' custom cover from:", cover_url)
+                    log.exception("Failed to download 'original' authorspace custom cover from:", cover_url)
                     try:
                         time.sleep(1)
+                        log("Downloading authorspace low-res custom cover from:", cover_url)
                         cdata = br.open_novisit(custom_cover_src, timeout=timeout).read()
                         if cdata:
                             result_queue.put((self, cdata))
                     except:
-                        log.exception("Failed to download custom cover from:", cover_url)
-            
-            log.info("custom cover url: %s" % custom_cover_src)
+                        log.exception("Failed to download low-res authorspace custom cover from:", cover_url)
+            else:
+                try:
+                    time.sleep(1)
+                    log("Downloading custom cover from:", cover_url)
+                    cdata = br.open_novisit(custom_cover_src, timeout=timeout).read()
+                    if cdata:
+                        result_queue.put((self, cdata))
+                except:
+                    log.exception("Failed to download custom cover from:", cover_url)
 
 
 if __name__ == "__main__":
@@ -405,6 +413,13 @@ if __name__ == "__main__":
     test_identify_plugin(
         Jinjiang.name,
         [
+            (
+                # TODO: custom cover test
+                {
+                    "identifiers": {"jinjiang": "3146241"},
+                },
+                [title_test("我五行缺你", exact=True), authors_test(["西子绪"])],
+            ),
             (
                 {
                     "identifiers": {"jinjiang": "2374843"},
