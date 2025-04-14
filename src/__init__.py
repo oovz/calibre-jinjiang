@@ -23,7 +23,7 @@ JINJIANG_BOOK_URL_PATTERN = re.compile(
 JINJIANG_BOOKCOVER_URL = "https://i9-static.jjwxc.net/novelimage.php?novelid=%s"
 
 PROVIDER_ID = "jinjiang"
-PROVIDER_VERSION = (1, 2, 4)
+PROVIDER_VERSION = (1, 2, 5)
 PROVIDER_AUTHOR = "Otaro"
 
 
@@ -366,24 +366,31 @@ class Jinjiang(Source):
             log.exception(e)
             return
 
-        custom_cover: str = root.xpath('//img[@class="noveldefaultimage"]')[0].get("src", "")
-        if custom_cover:
-            cover_url = custom_cover
-            parsed = urlparse(custom_cover)
+        custom_cover_src: str = root.xpath('//img[@class="noveldefaultimage"]')[0].get("src", "")
+        if custom_cover_src is not None:
+            parsed = urlparse(custom_cover_src)
             if "authorspace" in parsed.path:
                 # 'authorspace' meaning it's uploaded to jinjiang author space.
                 # Remove the tailing '_300_420' to get original image
                 cleaned_path = re.sub(r"_300_420(?=\.\w+$)", "", parsed.path)
                 cover_url = f"{parsed.scheme}://{parsed.netloc}{cleaned_path}"
-            log("Downloading custom cover from:", cover_url)
-            try:
-                time.sleep(1)
-                cdata = br.open_novisit(cover_url, timeout=timeout).read()
-                if cdata:
-                    result_queue.put((self, cdata))
-            except:
-                log.exception("Failed to download default cover from:", cover_url)        
-            log.info("custom cover url: %s" % cover_url)
+                log("Downloading custom cover from:", cover_url)
+                try:
+                    time.sleep(1)
+                    cdata = br.open_novisit(cover_url, timeout=timeout).read()
+                    if cdata:
+                        result_queue.put((self, cdata))
+                except:
+                    log.exception("Failed to download 'original' custom cover from:", cover_url)
+                    try:
+                        time.sleep(1)
+                        cdata = br.open_novisit(custom_cover_src, timeout=timeout).read()
+                        if cdata:
+                            result_queue.put((self, cdata))
+                    except:
+                        log.exception("Failed to download custom cover from:", cover_url)
+            
+            log.info("custom cover url: %s" % custom_cover_src)
 
 
 if __name__ == "__main__":
@@ -394,6 +401,7 @@ if __name__ == "__main__":
         authors_test,
     )
 
+    # TODO: add test cases for cover download
     test_identify_plugin(
         Jinjiang.name,
         [
