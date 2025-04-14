@@ -23,7 +23,7 @@ JINJIANG_BOOK_URL_PATTERN = re.compile(
 JINJIANG_BOOKCOVER_URL = "https://i9-static.jjwxc.net/novelimage.php?novelid=%s"
 
 PROVIDER_ID = "jinjiang"
-PROVIDER_VERSION = (1, 2, 3)
+PROVIDER_VERSION = (1, 2, 4)
 PROVIDER_AUTHOR = "Otaro"
 
 
