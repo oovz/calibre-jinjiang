@@ -28,6 +28,7 @@ PROVIDER_VERSION = (1, 2, 6)
 PROVIDER_AUTHOR = "Otaro"
 
 
+class SearchResultIndexMetadataCompareKeyGen:
 def parse_html(raw):
     try:
         from html5_parser import parse
@@ -92,6 +93,11 @@ class Jinjiang(Source):
         if len(res) == 1:
             return res[0]
         return None
+    
+    def identify_results_keygen(self, title=None, authors=None, identifiers={}):
+        def keygen(mi):
+            return SearchResultIndexMetadataCompareKeyGen(mi)
+        return keygen
 
     def identify(
         self,
@@ -276,6 +282,7 @@ class Jinjiang(Source):
                         mi.url = bURL
                         mi.cover = JINJIANG_BOOKCOVER_URL % novel_id
                         mi.pubdate = bPublishDate
+                        mi.search_result_index = i
 
                         log.info(
                             "[%d] id (%s) title (%s) author (%s) publish_data (%s)"
