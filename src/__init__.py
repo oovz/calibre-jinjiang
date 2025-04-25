@@ -348,12 +348,6 @@ class Jinjiang(Source):
                 log.info("no result after running identify")
                 return
 
-            results.sort(
-                key=self.identify_results_keygen(
-                    title=title, authors=authors, identifiers=identifiers
-                )
-            )
-
             # get the first result
             jj_id = results[0].identifiers.get(PROVIDER_ID, None)
 
