@@ -17,9 +17,7 @@ from lxml.html import tostring
 # ord=novelsize is sort by book size
 JINJIANG_SEARCH_URL = "https://www.jjwxc.net/search.php?kw=%s&ord=novelsize&t=1"
 JINJIANG_BOOK_URL = "https://www.jjwxc.net/onebook.php?novelid=%s"
-JINJIANG_BOOK_URL_PATTERN = re.compile(
-    "https://.*.jjwxc.net/onebook.php?novelid=(\\d+)?"
-)
+JINJIANG_BOOK_URL_PATTERN = re.compile(".jjwxc\\.net\\/onebook\\.php\\?novelid=(\\d+)")
 # there's a coverid param which I'm not sure what it's used for
 JINJIANG_BOOKCOVER_URL = "https://i9-static.jjwxc.net/novelimage.php?novelid=%s"
 
@@ -275,14 +273,13 @@ class Jinjiang(Source):
                         # @TODO: go into detail page to get the tags, cover pic, publish date and desc
                         bURL: str = book.xpath('h3[@class="title"]/a')[0].get("href", "")
                         if bURL:
-                            # Parse the URL
-                            parsed_url = urlparse(bURL)
-                            # Parse the query string into a dictionary
-                            # Note: parse_qs returns values as lists
-                            query_params = parse_qs(parsed_url.query)
-                            # Get the 'novelid' parameter's value
-                            # Access the first element of the list if the parameter exists
-                            novel_id = query_params.get("novelid", [None])[0]
+                            novel_id = self.id_from_url(bURL)
+                            if novel_id is None:
+                                log.error("[%d] can't find book id from url: %s" % (i, bURL))
+                                continue
+                        else:
+                            log.error("[i] can't find book url from search result" % (i))
+                            continue
                         bTitle = book.xpath('h3[@class="title"]//span')[0].text
                         bPublishDate = datetime.strptime(
                             book.xpath('h3[@class="title"]/font')[0]
