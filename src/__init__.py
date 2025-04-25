@@ -14,7 +14,8 @@ from lxml.html import tostring
 # note that string passed-in will need to be url-encoded
 # jinjiang may use site search or bing cn search in a iframe
 # t=1 is book title, t=2 is author
-JINJIANG_SEARCH_URL = "https://www.jjwxc.net/search.php?kw=%s&ord=&t=1"
+# ord=novelsize is sort by book size
+JINJIANG_SEARCH_URL = "https://www.jjwxc.net/search.php?kw=%s&ord=novelsize&t=1"
 JINJIANG_BOOK_URL = "https://www.jjwxc.net/onebook.php?novelid=%s"
 JINJIANG_BOOK_URL_PATTERN = re.compile(
     "https://.*.jjwxc.net/onebook.php?novelid=(\\d+)?"
