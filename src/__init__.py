@@ -218,15 +218,10 @@ class Jinjiang(Source):
         # if that fails, it will use bing cn / baidu (bing cn is default)
         # bing cn is smart enough to search with title+author, even with misspelling
         normalized_authors = [] if authors is None else authors
-        normalized_title = [] if title is None else [title]
-        search_url = JINJIANG_SEARCH_URL % quote(
-            "".join(normalized_title + normalized_authors), encoding="gb18030"
-        )
+        normalized_title = "" if title is None else title
+        search_url = JINJIANG_SEARCH_URL % quote(normalized_title, encoding="gb18030")
 
-        log.info(
-            "identify with title and/or author (%s) from url: %s"
-            % ("".join(normalized_title + normalized_authors), search_url)
-        )
+        log.info("identify with title (%s) from url: %s" % (normalized_title, search_url))
 
         br = self.browser
         try:
@@ -262,6 +257,7 @@ class Jinjiang(Source):
                     log.info("found %d books from bing search" % len(books))
 
                     # @TODO: supports bing search result
+                    # @TODO: redo search with title+author if authors is not None
                 else:
                     # @TODO: supports paging
                     books = root.xpath('//div[@id="search_result"]/div[not(@style) and not(@class)]')
