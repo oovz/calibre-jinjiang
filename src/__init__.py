@@ -29,6 +29,31 @@ PROVIDER_AUTHOR = "Otaro"
 
 
 class SearchResultIndexMetadataCompareKeyGen:
+    def __init__(self, mi):
+        self.extra = getattr(mi, 'search_result_index', 0)
+
+    def compare_to_other(self, other):
+        return self.extra - other.extra
+
+    def __eq__(self, other):
+        return self.compare_to_other(other) == 0
+
+    def __ne__(self, other):
+        return self.compare_to_other(other) != 0
+
+    def __lt__(self, other):
+        return self.compare_to_other(other) < 0
+
+    def __le__(self, other):
+        return self.compare_to_other(other) <= 0
+
+    def __gt__(self, other):
+        return self.compare_to_other(other) > 0
+
+    def __ge__(self, other):
+        return self.compare_to_other(other) >= 0
+
+
 def parse_html(raw):
     try:
         from html5_parser import parse
