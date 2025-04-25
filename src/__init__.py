@@ -22,7 +22,7 @@ JINJIANG_BOOK_URL_PATTERN = re.compile(".jjwxc\\.net\\/onebook\\.php\\?novelid=(
 JINJIANG_BOOKCOVER_URL = "https://i9-static.jjwxc.net/novelimage.php?novelid=%s"
 
 PROVIDER_ID = "jinjiang"
-PROVIDER_VERSION = (1, 2, 6)
+PROVIDER_VERSION = (1, 3, 0)
 PROVIDER_AUTHOR = "Otaro"
 
 
@@ -141,7 +141,7 @@ class Jinjiang(Source):
                 raw = br.open_novisit(url, timeout=timeout).read().strip()
             except Exception as e:
                 log.exception(e)
-                return None
+                return e
 
             raw = clean_ascii_chars(
                 xml_to_unicode(raw, strip_encoding_pats=True, resolve_entities=True)[0]
@@ -151,7 +151,7 @@ class Jinjiang(Source):
                 root = parse_html(raw)
             except Exception as e:
                 log.exception(e)
-                return None
+                return e
 
             title = root.xpath('//span[@itemprop="articleSection"]')[0].text
             author = root.xpath('//span[@itemprop="author"]')[0].text
@@ -199,7 +199,7 @@ class Jinjiang(Source):
                             datetime_str, "%Y-%m-%d %H:%M:%S"
                         )
                 else:
-                    log.error("first chapter's chapter_id is not 1, something wrong with the book")
+                    log.error("first chapter's chapter_id is not 1, something is wrong with the book")
 
             mi = Metadata(title, [author])
             mi.identifiers = {PROVIDER_ID: jj_id}
@@ -212,7 +212,7 @@ class Jinjiang(Source):
             mi.pubdate = bPublishDate
 
             result_queue.put(mi)
-            return
+            return None
 
         # jinjiang will try to use its own search engine first
         # if that fails, it will use bing cn / baidu (bing cn is default)
@@ -228,7 +228,7 @@ class Jinjiang(Source):
             raw = br.open_novisit(search_url, timeout=timeout).read().strip()
         except Exception as e:
             log.exception(e)
-            return
+            return e
 
         raw = clean_ascii_chars(
             xml_to_unicode(raw, strip_encoding_pats=True, resolve_entities=True)[0]
@@ -238,7 +238,7 @@ class Jinjiang(Source):
             root = parse_html(raw)
         except Exception as e:
             log.exception(e)
-            return
+            return e
 
         detected_books = root.xpath('//table[@class="searchContainer"]//div[@class="nav"]')[0]
         if detected_books is not None:
@@ -254,7 +254,7 @@ class Jinjiang(Source):
                 if number == 0:
                     # this is bing cn search
                     books = root.xpath('//ol[@id="b_results"]/li[@class="b_algo"]')
-                    log.info("found %d books from bing search" % len(books))
+                    log.info("found %d books from bing search, but bing search is not supported yet" % len(books))
 
                     # @TODO: supports bing search result
                     # @TODO: redo search with title+author if authors is not None
@@ -308,12 +308,16 @@ class Jinjiang(Source):
                         )
 
                         result_queue.put(mi)
+                    
+                    return None
             else:
-                log.error("can't parsing search result: %s" % (div_text_cleaned))
+                error_msg = "can't find number of books from search result: %s" % (div_text_cleaned)
+                log.error(error_msg)
+                return error_msg
         else:
-            log.error(
-                "can't get detected books element from search result: %s" % (search_url)
-            )
+            error_msg = "can't get detected books element from search result: %s" % (search_url)
+            log.error(error_msg)
+            return error_msg
 
     def download_cover(
         self,
@@ -345,14 +349,14 @@ class Jinjiang(Source):
                     break
 
             if len(results) == 0:
-                log.info("no result after running identify")
+                log.error("No result after running identify")
                 return
 
             # get the first result
             jj_id = results[0].identifiers.get(PROVIDER_ID, None)
 
         if jj_id is None:
-            log.info("No id found after running identify")
+            log.error("No id found after running identify")
             return
         
         br = self.browser
