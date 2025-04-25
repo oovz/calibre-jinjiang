@@ -22,7 +22,7 @@ JINJIANG_BOOK_URL_PATTERN = re.compile(".jjwxc\\.net\\/onebook\\.php\\?novelid=(
 JINJIANG_BOOKCOVER_URL = "https://i9-static.jjwxc.net/novelimage.php?novelid=%s"
 
 PROVIDER_ID = "jinjiang"
-PROVIDER_VERSION = (1, 3, 0)
+PROVIDER_VERSION = (1, 3, 1)
 PROVIDER_AUTHOR = "Otaro"
 
 
@@ -66,7 +66,7 @@ def parse_html(raw):
 
 # a metadata download plugin
 class Jinjiang(Source):
-    name = "jjwxc.net"  # Name of the plugin
+    name = "晋江文学城"  # Name of the plugin
     description = "Downloads metadata and covers from Jinjiang."
     supported_platforms = [
         "windows",
