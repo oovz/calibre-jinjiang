@@ -368,7 +368,6 @@ class Jinjiang(Source):
         br = self.browser
 
         # try get default cover first
-        cover_url = JINJIANG_BOOKCOVER_URL % jj_id
         log("Downloading default cover from:", cover_url)
         try:
             time.sleep(1)
