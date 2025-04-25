@@ -1,4 +1,4 @@
-## calibre-qidian
+## calibre-jinjiang
 Calibre 起点书籍信息和封面下载插件
 部分代码基于 [calibre-qidian](https://github.com/oovz/calibre-qidian)
 
