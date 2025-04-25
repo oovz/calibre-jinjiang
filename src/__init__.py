@@ -265,7 +265,6 @@ class Jinjiang(Source):
                             method="html",
                             encoding="utf-8",
                         ).strip()
-                        log.info("123123")
 
                         mi = Metadata(bTitle, [bAuthor])
                         mi.identifiers = {PROVIDER_ID: novel_id}
