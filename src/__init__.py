@@ -364,14 +364,16 @@ class Jinjiang(Source):
         br = self.browser
 
         # try get default cover first
-        log("Downloading default cover from:", cover_url)
-        try:
-            time.sleep(1)
-            cdata = br.open_novisit(cover_url, timeout=timeout).read()
-            if cdata:
-                result_queue.put((self, cdata))
-        except:
-            log.exception("Failed to download default cover from:", cover_url)
+        cover_url = self.get_cached_cover_url({PROVIDER_ID: jj_id})
+        if cover_url is not None:
+            log("Downloading default cover from:", cover_url)
+            try:
+                time.sleep(1)
+                cdata = br.open_novisit(cover_url, timeout=timeout).read()
+                if cdata:
+                    result_queue.put((self, cdata))
+            except:
+                log.exception("Failed to download default cover from:", cover_url)
 
         # try get custom cover
         try:
