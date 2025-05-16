@@ -22,7 +22,7 @@ JINJIANG_BOOK_URL_PATTERN = re.compile(".jjwxc\\.net\\/onebook\\.php\\?novelid=(
 JINJIANG_BOOKCOVER_URL = "https://i9-static.jjwxc.net/novelimage.php?novelid=%s"
 
 PROVIDER_ID = "jinjiang"
-PROVIDER_VERSION = (1, 3, 1)
+PROVIDER_VERSION = (1, 4, 0)
 PROVIDER_AUTHOR = "Otaro"
 
 
@@ -67,7 +67,7 @@ def parse_html(raw):
 # a metadata download plugin
 class Jinjiang(Source):
     name = "晋江文学城"  # Name of the plugin
-    description = "Downloads metadata and covers from Jinjiang."
+    description = "Downloads metadata and covers from Jinjiang (jjwxc.net)"
     supported_platforms = [
         "windows",
         "osx",
@@ -213,6 +213,16 @@ class Jinjiang(Source):
 
             result_queue.put(mi)
             return None
+        
+        # If we have other identifiers, give up
+        if identifiers:
+            log.info("Other identifiers found, giving up")
+            return None
+
+        # If we don't have ID, ensure we have a title
+        if not title:
+            log.error('Title is required for search')
+            return None
 
         # jinjiang will try to use its own search engine first
         # if that fails, it will use bing cn / baidu (bing cn is default)
@@ -274,7 +284,7 @@ class Jinjiang(Source):
                                 log.error("[%d] can't find book id from url: %s" % (i, bURL))
                                 continue
                         else:
-                            log.error("[i] can't find book url from search result" % (i))
+                            log.error("[%d] can't find book url from search result" % (i))
                             continue
                         bTitle = book.xpath('h3[@class="title"]//span')[0].text
                         bPublishDate = datetime.strptime(
